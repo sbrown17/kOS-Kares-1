@@ -2,7 +2,7 @@ function main {
     launchStart().
     print "Lift Off!".
     ascentGuidance().
-    until apoapsis > 70000 {
+    until apoapsis > 95000 {
         ascentStaging().
     }
     // circularizationBurn().
@@ -31,15 +31,10 @@ function stageRocket {
 }
 
 function ascentGuidance {
-    // what if we reverse the heading angles so that we can fly a space shuttle on its back similar to IRL
-    until altitude > 200 {
-        lock steering to heading(0, 85).
-    }
-    // this is some silly thing wolfram did, im betting a simpler equation could work better (logarithmic! not quadratic!!!!)
-    //lock targetPitch to 88.963 - 1.03287 * alt:radar^0.409511.
+    lock targetPitch to 88.963 - 1.03287 * alt:radar^0.409511.
     // lets try nat. log (e ^ 2)
-    lock targetPitch to alt:radar * constant:e ^ 2.
-    lock steering to heading(0, targetPitch).
+    //lock targetPitch to alt:radar * constant:e ^ 2.
+    lock steering to heading(90, targetPitch).
 }
 
 function ascentStaging {
