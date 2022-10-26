@@ -25,13 +25,15 @@ function launchStart {
         wait 1.
     }
     print "All systems go.".
-    stageRocket().
+    stageRocket("Launch").
 }
 
 function stageRocket {
+    parameter stageName.
+
     wait until stage:ready.
     SET stagingRocket TO TRUE.
-    PRINT "Staging rocket...".
+    PRINT "Staging " + stageName + "...".
     stage.
     SET stagingRocket TO FALSE.
 }
@@ -46,25 +48,23 @@ function ascentGuidance {
 
 function ascentStaging {
     if not(defined oldThrust) {
-    global oldThrust is ship:availablethrust.
-  }
-  if ship:availablethrust < (oldThrust - 10) {
-    until false {
-      stageRocket(). wait 1.
-      if ship:availableThrust > 0 { 
-        break.
-      }
+        global oldThrust is ship:availablethrust.
     }
-    global oldThrust is ship:availablethrust.
-  }
+    if ship:availablethrust < (oldThrust - 10) {
+        until false {
+            stageRocket("Rocket"). wait 1.
+            if ship:availableThrust > 0 { 
+            break.
+            }
+        }
+        global oldThrust is ship:availablethrust.
+    }
 }
 
 function abortSystemMonitor {
-    // mass differential detection
-    // find smallest mass of object that could cause catastrophic loss and monitor for instantaneous loss of said mass or above?
     // MUST NOT BE MONITORED DURING STAGING
     // Account for inclination change that is too severe
-    // Find way to jettison heat shield
+    
     PRINT "Monitoring for abort procedure...".
     UNTIL (not stagingRocket and Constant:g0 > 10) {
         GLOBAL OLDSHIPMASS IS MASS.
@@ -74,9 +74,12 @@ function abortSystemMonitor {
             ABORT ON.
             WAIT 1.
             // Lose the launch abort tower
-            stageRocket().
+            stageRocket("Launch Abort Tower").
             // Activate parachutes
-            stageRocket().
+            stageRocket("Parachutes").
+            
+            // Point retrograde after this
+            // below ??? alt jettison heat shield
         }
     }
 }
