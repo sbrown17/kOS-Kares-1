@@ -4,6 +4,7 @@ function main {
     print "Lift Off!".
     ascentGuidance().
     until apoapsis > 95000 {
+        PRINT "Monitoring Ascent Staging and Abort Procedure...".
         abortSystemMonitor().
         ascentStaging().
     }
@@ -36,6 +37,7 @@ function stageRocket {
 }
 
 function ascentGuidance {
+    PRINT "Ascent Guidance Operational...".
     lock targetPitch to 88.963 - 1.03287 * alt:radar^0.409511.
     // lets try nat. log (e ^ 2)
     //lock targetPitch to alt:radar * constant:e ^ 2.
@@ -62,13 +64,18 @@ function abortSystemMonitor {
     // find smallest mass of object that could cause catastrophic loss and monitor for instantaneous loss of said mass or above?
     // MUST NOT BE MONITORED DURING STAGING
     // Account for inclination change that is too severe
+    // Find way to jettison heat shield
     PRINT "Monitoring for abort procedure...".
     UNTIL (not stagingRocket and Constant:g0 > 10) {
-        GLOBAL SHIPMASS IS MASS.
+        GLOBAL OLDSHIPMASS IS MASS.
         WAIT 0.1.
-        IF (MASS < SHIPMASS - 0.16) {
+        IF (MASS < (OLDSHIPMASS - 16)) {
+            PRINT "ABORT ABORT ABORT!".
             ABORT ON.
             WAIT 1.
+            // Lose the launch abort tower
+            stageRocket().
+            // Activate parachutes
             stageRocket().
         }
     }
