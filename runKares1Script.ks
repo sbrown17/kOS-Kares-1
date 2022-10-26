@@ -1,21 +1,23 @@
+global stagingRocket TO FALSE.
 function main {
     launchStart().
     print "Lift Off!".
     ascentGuidance().
     until apoapsis > 95000 {
+        abortSystemMonitor().
         ascentStaging().
     }
     // circularizationBurn().
     // spacecraftConfigManeuver().
     // munarTransferBurn().
     // munarOrbitalBurn().
-
+    
 
 }
 
 function launchStart {
     sas OFF.
-    print "Guidance internal".
+    print "Guidance Internal".
     lock throttle to 1.
     for i in range(0,10){
         print "Countdown: " + (10 - i).
@@ -27,7 +29,10 @@ function launchStart {
 
 function stageRocket {
     wait until stage:ready.
+    SET stagingRocket TO TRUE.
+    PRINT "Staging rocket...".
     stage.
+    SET stagingRocket TO FALSE.
 }
 
 function ascentGuidance {
@@ -50,5 +55,22 @@ function ascentStaging {
     }
     global oldThrust is ship:availablethrust.
   }
+}
+
+function abortSystemMonitor {
+    // mass differential detection
+    // find smallest mass of object that could cause catastrophic loss and monitor for instantaneous loss of said mass or above?
+    // MUST NOT BE MONITORED DURING STAGING
+    // Account for inclination change that is too severe
+    PRINT "Monitoring for abort procedure...".
+    UNTIL (not stagingRocket and Constant:g0 > 10) {
+        GLOBAL SHIPMASS IS MASS.
+        WAIT 0.1.
+        IF (MASS < SHIPMASS - 0.16) {
+            ABORT ON.
+            WAIT 1.
+            stageRocket().
+        }
+    }
 }
 main().
